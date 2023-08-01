@@ -1,14 +1,18 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import axios from 'axios'
 import Profile from '../services/Profile.tsx'
 import {Spinner} from '@chakra-ui/react'
 import { useDispatch } from 'react-redux'
 import { setAccessToken } from '../store/user'
-import {useSearchParams, useNavigate} from 'react-router-dom'
+import {useSearchParams, useNavigate, Navigate} from 'react-router-dom'
 
 function GithubRedirect () {
     const [params] = useSearchParams()
     const code: string | null = params.get("code")
+
+    if (!code) {
+        return <Navigate to="/login" />
+    }
 
     return (
         <>
