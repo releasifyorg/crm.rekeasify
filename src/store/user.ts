@@ -18,6 +18,7 @@ const user = createSlice({
         },
         setUser: (state, action) => {
             state.user = action.payload
+            state.isAuth = true
         },
         setAccessToken: (state, action) => {
             state.accessToken = action.payload

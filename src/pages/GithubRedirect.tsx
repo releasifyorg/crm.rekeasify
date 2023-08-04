@@ -1,5 +1,8 @@
-import React, { useState } from 'react'
-import axios from 'axios'
+import React from 'react'
+import {
+    useQuery,
+} from '@tanstack/react-query'
+import githubAuth from "../apis/githubAuth.ts"
 import Profile from '../services/Profile.tsx'
 import {Spinner} from '@chakra-ui/react'
 import { useDispatch } from 'react-redux'
@@ -26,32 +29,24 @@ function GithubRedirect () {
 }
 
 
-const Redirect: React.FC<{code: string | null}> = ({ code }) => {
+const Redirect: React.FC<{code: string}> = ({ code }) => {
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
-    const [isSuccess, setIsSuccess] = useState<boolean | null>(null)
+    const { isLoading, error, data } = useQuery({
+        queryKey: ['repoData'],
+        queryFn: () => githubAuth(code)
+    })
 
+    dispatch(setAccessToken(data))
 
-        const call = async () => {
-            try {
-                const response = await axios.post(import.meta.env.VITE_API_URL + 'github/auth', { code: code })
-                dispatch(setAccessToken(response.data))
-                setIsSuccess(true)
-            } catch (error) {
-                setIsSuccess(false)
-            }
-        }
-
-        call()
-
-
-    if (isSuccess === false) {
+    if (error) {
+        console.log(error)
         navigate('/login')
     }
 
-    if (isSuccess === true) {
+    if (!isLoading && !error) {
         return <Profile/>
     }
 }

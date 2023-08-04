@@ -1,29 +1,63 @@
 import React, {useState} from 'react'
-import {Checkbox, Input} from '@chakra-ui/react'
+import {Input, useToast} from '@chakra-ui/react'
 import GitHubAuth from '../components/GitHubAuth'
+import {useDispatch} from "react-redux"
+import login from "../apis/login.ts"
+import {setAccessToken} from "../store/user.ts"
+import Navigator from "../services/Navigator.tsx"
 
 const Login: React.FC = () => {
+
     interface Form {
-        email: string;
-        password: string;
+        username: string
+        password: string
     }
 
-    const [values, setValues] = useState<Form>({
-        email: '',
-        password: ''
-    });
+    const toast = useToast()
+    const dispatch = useDispatch()
 
-    const [rememberMe, setRememberMe] = useState<boolean>(false);
+    const [values, setValues] = useState<Form>({
+        username: '',
+        password: ''
+    })
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setValues({
             ...values,
             [event.target.name]: event.target.value
-        });
-    };
+        })
+    }
 
-    const handleSubmit = () => {
-        console.log(values)
+
+
+
+    const handleSubmit = async () => {
+        if (values.username && values.password) {
+
+            login(values.username, values.password).then(
+                token => {
+                    dispatch(setAccessToken(token))
+                    return <Navigator/>
+                }
+            ).catch(() => {
+                toast({
+                    title: 'Login failed',
+                    description: "Please check your credentials",
+                    status: 'error',
+                    duration: 9000,
+                    isClosable: true,
+                })
+            })
+
+        } else {
+            toast({
+                title: 'Validation failed',
+                description: "Please enter a username and password",
+                status: 'warning',
+                duration: 9000,
+                isClosable: true,
+            })
+        }
     }
 
 
@@ -45,17 +79,17 @@ const Login: React.FC = () => {
                     <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
                         <form className="space-y-6" action="#" method="POST">
                             <div>
-                                <label htmlFor="email"
+                                <label htmlFor="username"
                                        className="block text-sm font-medium leading-6 text-gray-900">
-                                    Email address
+                                    Username
                                 </label>
                                 <div className="mt-2">
                                     <Input
-                                        type="email"
-                                        name="email"
-                                        value={values.email}
-                                        placeholder='Here is a sample placeholder'
-                                        autoComplete="current-email"
+                                        type="username"
+                                        name="username"
+                                        value={values.username}
+                                        placeholder='devbob'
+                                        autoComplete="current-username"
                                         onChange={handleChange}
                                     />
                                 </div>
@@ -77,17 +111,7 @@ const Login: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center">
-                                    <Checkbox
-                                        defaultChecked
-                                        isChecked={rememberMe}
-                                        onChange={() => setRememberMe(!rememberMe)}
-                                    >
-                                        Remember me
-                                    </Checkbox>
-                                </div>
-
+                            <div className="flex items-center justify-end">
                                 <div className="text-sm leading-6">
                                     <a href="#" className="font-semibold text-blue-600 hover:text-blue-500">
                                         Forgot password?
@@ -96,12 +120,12 @@ const Login: React.FC = () => {
                             </div>
 
                             <div>
-                                <button
+                                <a
                                     onClick={handleSubmit}
                                     className="flex w-full justify-center rounded-md bg-blue-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                                 >
                                     Sign in
-                                </button>
+                                </a>
                             </div>
                         </form>
 
@@ -134,3 +158,4 @@ const Login: React.FC = () => {
 }
 
 export default Login
+

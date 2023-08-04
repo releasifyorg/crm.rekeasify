@@ -1,20 +1,20 @@
 import { useSelector, useDispatch } from 'react-redux'
 import { checkFirst } from '../store/user'
-import {useNavigate} from 'react-router-dom'
+import {Navigate} from 'react-router-dom'
 import {UserStore} from '../types/User'
+import React from "react";
 
-const Navigator: () => void = () => {
-    const navigate = useNavigate()
+const Navigator: React.FC = () => {
     const dispatch = useDispatch()
     const { initialRoute } = useSelector((state: { user: UserStore }) => state.user)
 
     if (initialRoute) {
         dispatch(checkFirst())
-        navigate(initialRoute)
+        return <Navigate to={initialRoute} />
     }
 
     dispatch(checkFirst())
-    navigate('/')
+    return <Navigate to="/" />
 
 }
 

@@ -1,56 +1,29 @@
-import { useSelector, useDispatch } from 'react-redux'
-import { setUser, setAuth } from '../store/user'
-import {UserStore} from '../types/User'
-import axios from 'axios'
+import { useDispatch } from 'react-redux'
 import Navigator from './Navigator'
 
 import {useNavigate} from 'react-router-dom'
-import {useEffect, useState} from "react"
+import {useQuery} from "@tanstack/react-query";
+import getProfile from "../apis/profile.ts";
+import {setUser} from "../store/user.ts";
+import React from "react";
 
-const Profile = () => {
+const Profile: React.FC = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
-    // eslint-disable-next-line no-undef
-    const url = import.meta.env.VITE_API_URL
 
-    let { accessToken } = useSelector((state: { user: UserStore }) => state.user)
+    const { isLoading, isError, data } = useQuery({
+        queryFn: () => getProfile()
+    })
 
-    if (!accessToken) {
-        accessToken = localStorage.getItem('access_token') ?? ''
-    }
-
-    if (!accessToken) {
+    if (isError) {
         navigate('/login')
     }
 
-    const [isSuccess, setIsSuccess] = useState<boolean | null>(null)
+    dispatch(setUser(data))
 
-    useEffect(() => {
 
-        const call = async () => {
-            try {
-                const response = await axios.get(url + 'profile', {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`
-                    }
-                })
-                dispatch(setUser(response.data))
-                dispatch(setAuth())
-                setIsSuccess(true)
-            } catch (error) {
-                navigate('/login')
-            }
-        }
-
-        call()
-
-    })
-
-    console.log(isSuccess, 1)
-
-    if (isSuccess === true) {
-        // @ts-ignore
+    if (!isLoading && !isError) {
         return <Navigator/>
     }
 }
